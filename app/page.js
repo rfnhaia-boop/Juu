@@ -1,8 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 
-const MESSAGES = ['Arrasou! Falta pouco! 🌟','Isso sim é vida! 💖','Menos um medo, mais uma história! ✨',
-  'Você tá demais! 🦋','Cada passo conta, linda! 🌸','Poderosa! 💅','Que incrível você é! 🌺','Brilha! ⭐']
+const MESSAGES = ['Arrasou! 🌟','Isso sim é vida! 💖','Menos um medo! ✨','Você tá demais! 🦋','Cada passo conta! 🌸','Poderosa! 💅','Incrível você! 🌺','Brilha! ⭐']
 const CONFETTI_COLORS = ['#f4c2c2','#dcd0f0','#d4a96a','#fde8e8','#ede8f8','#f0d9b0']
 
 async function api(method, path, body) {
@@ -14,74 +13,164 @@ async function api(method, path, body) {
   return data
 }
 
-// Butterfly SVG paths for decoration
-const BUTTERFLY_PATHS = [
-  { top:'8%',  left:'5%',  size:44, rot:-20, delay:0,    dur:6  },
-  { top:'15%', left:'88%', size:36, rot:15,  delay:1.2,  dur:7  },
-  { top:'35%', left:'3%',  size:28, rot:-10, delay:0.5,  dur:8  },
-  { top:'55%', left:'92%', size:40, rot:25,  delay:2,    dur:6.5},
-  { top:'72%', left:'7%',  size:32, rot:-30, delay:1.5,  dur:7.5},
-  { top:'82%', left:'85%', size:38, rot:10,  delay:0.8,  dur:6  },
-  { top:'25%', left:'50%', size:22, rot:5,   delay:3,    dur:9  },
-  { top:'65%', left:'45%', size:26, rot:-15, delay:2.5,  dur:8  },
-]
+function daysLeft(deadline) {
+  if (!deadline) return null
+  const diff = Math.ceil((new Date(deadline) - new Date()) / 86400000)
+  return diff
+}
 
-function Butterfly({ top, left, size, rot, delay, dur }) {
+function DeadlineBadge({ deadline }) {
+  if (!deadline) return null
+  const d = daysLeft(deadline)
+  const color = d < 0 ? '#e05070' : d <= 7 ? '#d4906a' : '#80a880'
+  const label = d < 0 ? `${Math.abs(d)}d atrasada` : d === 0 ? 'Hoje!' : `${d}d`
+  return <span style={{fontSize:10,fontWeight:700,color:'white',background:color,padding:'2px 7px',borderRadius:8,flexShrink:0}}>{label}</span>
+}
+
+// Watercolor SVG background
+function WatercolorBg() {
   return (
-    <div style={{
-      position:'fixed', top, left, width:size, height:size,
-      opacity:0.18, transform:`rotate(${rot}deg)`,
-      animation:`bfly ${dur}s ease-in-out ${delay}s infinite`,
-      pointerEvents:'none', zIndex:0,
-    }}>
-      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Left wings */}
-        <ellipse cx="30" cy="28" rx="28" ry="22" fill="#e8a0a0" opacity="0.9"/>
-        <ellipse cx="22" cy="52" rx="20" ry="14" fill="#dcd0f0" opacity="0.85"/>
-        {/* Right wings */}
-        <ellipse cx="70" cy="28" rx="28" ry="22" fill="#e8a0a0" opacity="0.9"/>
-        <ellipse cx="78" cy="52" rx="20" ry="14" fill="#dcd0f0" opacity="0.85"/>
-        {/* Body */}
-        <ellipse cx="50" cy="38" rx="4" ry="18" fill="#c8a0b8"/>
-        {/* Antennae */}
-        <line x1="50" y1="20" x2="38" y2="8" stroke="#c8a0b8" strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="50" y1="20" x2="62" y2="8" stroke="#c8a0b8" strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="37" cy="7" r="2" fill="#e8a0a0"/>
-        <circle cx="63" cy="7" r="2" fill="#e8a0a0"/>
-        {/* Wing details */}
-        <ellipse cx="30" cy="26" rx="10" ry="8" fill="#f4c2c2" opacity="0.5"/>
-        <ellipse cx="70" cy="26" rx="10" ry="8" fill="#f4c2c2" opacity="0.5"/>
-      </svg>
-    </div>
+    <svg style={{position:'fixed',inset:0,width:'100%',height:'100%',zIndex:-1}} preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="blur1"><feGaussianBlur stdDeviation="18"/></filter>
+        <filter id="blur2"><feGaussianBlur stdDeviation="28"/></filter>
+        <filter id="blur3"><feGaussianBlur stdDeviation="10"/></filter>
+        <filter id="noise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+          <feColorMatrix type="saturate" values="0"/>
+          <feBlend in="SourceGraphic" mode="multiply" result="blend"/>
+          <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+        </filter>
+      </defs>
+      {/* Base gradient */}
+      <rect width="800" height="900" fill="url(#bgGrad)"/>
+      <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fce8f5"/>
+          <stop offset="40%" stopColor="#f0e6fb"/>
+          <stop offset="100%" stopColor="#e8f0fb"/>
+        </linearGradient>
+      </defs>
+
+      {/* Watercolor blobs */}
+      <ellipse cx="120" cy="100" rx="180" ry="140" fill="#f7c5d5" opacity="0.45" filter="url(#blur2)"/>
+      <ellipse cx="680" cy="80" rx="160" ry="120" fill="#d8c5f0" opacity="0.4" filter="url(#blur2)"/>
+      <ellipse cx="400" cy="300" rx="220" ry="160" fill="#fce0ea" opacity="0.3" filter="url(#blur2)"/>
+      <ellipse cx="50" cy="500" rx="150" ry="200" fill="#e8d5f5" opacity="0.35" filter="url(#blur2)"/>
+      <ellipse cx="750" cy="600" rx="170" ry="150" fill="#f5c8d8" opacity="0.38" filter="url(#blur2)"/>
+      <ellipse cx="400" cy="800" rx="250" ry="140" fill="#ddd0f5" opacity="0.3" filter="url(#blur2)"/>
+
+      {/* Floral elements - roses */}
+      {/* Top left cluster */}
+      <g transform="translate(60,60) rotate(-15)" opacity="0.55" filter="url(#blur3)">
+        <circle cx="0" cy="0" r="22" fill="#f0a0b8"/>
+        <circle cx="18" cy="-10" r="16" fill="#f5b8c8"/>
+        <circle cx="-15" cy="-12" r="14" fill="#e890a8"/>
+        <circle cx="5" cy="-22" r="12" fill="#f8c8d5"/>
+        <circle cx="0" cy="0" r="10" fill="#e87898"/>
+        {/* petals */}
+        <ellipse cx="0" cy="-28" rx="8" ry="14" fill="#f9d0dc" opacity="0.8"/>
+        <ellipse cx="26" cy="-10" rx="8" ry="14" fill="#f9d0dc" opacity="0.8" transform="rotate(72,26,-10)"/>
+        <ellipse cx="16" cy="20" rx="8" ry="14" fill="#f9d0dc" opacity="0.8" transform="rotate(144,16,20)"/>
+        <ellipse cx="-16" cy="20" rx="8" ry="14" fill="#f9d0dc" opacity="0.8" transform="rotate(216,-16,20)"/>
+        <ellipse cx="-26" cy="-10" rx="8" ry="14" fill="#f9d0dc" opacity="0.8" transform="rotate(288,-26,-10)"/>
+      </g>
+
+      {/* Top right flower */}
+      <g transform="translate(730,50) rotate(20)" opacity="0.5" filter="url(#blur3)">
+        <circle cx="0" cy="0" r="18" fill="#c8a0e0"/>
+        <ellipse cx="0" cy="-24" rx="7" ry="13" fill="#dcc0f0" opacity="0.8"/>
+        <ellipse cx="22" cy="-8" rx="7" ry="13" fill="#dcc0f0" opacity="0.8" transform="rotate(72,22,-8)"/>
+        <ellipse cx="14" cy="18" rx="7" ry="13" fill="#dcc0f0" opacity="0.8" transform="rotate(144,14,18)"/>
+        <ellipse cx="-14" cy="18" rx="7" ry="13" fill="#dcc0f0" opacity="0.8" transform="rotate(216,-14,18)"/>
+        <ellipse cx="-22" cy="-8" rx="7" ry="13" fill="#dcc0f0" opacity="0.8" transform="rotate(288,-22,-8)"/>
+        <circle cx="0" cy="0" r="8" fill="#b080d0"/>
+      </g>
+
+      {/* Scattered small flowers */}
+      {[[180,180,0.4,'#f5b0c8',12],[600,200,0.35,'#c0a0e8',10],[100,380,0.38,'#f8c8d8',9],[700,350,0.4,'#d0b0f0',11],[250,700,0.42,'#f5a8c0',13],[550,750,0.36,'#c8a8e8',10],[400,150,0.3,'#f0b8d0',8],[680,480,0.38,'#d8b8f5',11],[120,650,0.35,'#f5c0d0',9]].map(([x,y,op,fill,r],i) => (
+        <g key={i} transform={`translate(${x},${y})`} opacity={op}>
+          <circle cx="0" cy="0" r={r} fill={fill}/>
+          <ellipse cx="0" cy={-r-8} rx={r*0.5} ry={r*0.8} fill={fill} opacity="0.7"/>
+          <ellipse cx={r+6} cy={-r*0.4} rx={r*0.5} ry={r*0.8} fill={fill} opacity="0.7" transform={`rotate(72,${r+6},${-r*0.4})`}/>
+          <ellipse cx={r*0.6} cy={r+5} rx={r*0.5} ry={r*0.8} fill={fill} opacity="0.7" transform={`rotate(144,${r*0.6},${r+5})`}/>
+          <ellipse cx={-r*0.6} cy={r+5} rx={r*0.5} ry={r*0.8} fill={fill} opacity="0.7" transform={`rotate(216,${-r*0.6},${r+5})`}/>
+          <ellipse cx={-r-6} cy={-r*0.4} rx={r*0.5} ry={r*0.8} fill={fill} opacity="0.7" transform={`rotate(288,${-r-6},${-r*0.4})`}/>
+        </g>
+      ))}
+
+      {/* Butterflies */}
+      {[[300,80,0.3,0.8],[650,280,0.28,1.1],[80,280,0.25,0.9],[720,700,0.3,1.0],[200,820,0.27,0.85],[500,600,0.22,1.2]].map(([x,y,op,sc],i) => (
+        <g key={i} transform={`translate(${x},${y}) scale(${sc})`} opacity={op}>
+          <ellipse cx="-18" cy="-8" rx="16" ry="12" fill="#e8a0c0" transform="rotate(-20,-18,-8)"/>
+          <ellipse cx="-12" cy="10" rx="12" ry="8" fill="#c8a0e0" transform="rotate(-10,-12,10)"/>
+          <ellipse cx="18" cy="-8" rx="16" ry="12" fill="#e8a0c0" transform="rotate(20,18,-8)"/>
+          <ellipse cx="12" cy="10" rx="12" ry="8" fill="#c8a0e0" transform="rotate(10,12,10)"/>
+          <ellipse cx="0" cy="0" rx="2.5" ry="14" fill="#b08090"/>
+        </g>
+      ))}
+
+      {/* Leaves */}
+      {[[80,130,0.3],[720,160,0.28],[40,450,0.25],[760,550,0.3],[300,850,0.28],[500,50,0.25]].map(([x,y,op],i) => (
+        <ellipse key={i} cx={x} cy={y} rx="8" ry="22" fill="#a0c890" opacity={op} transform={`rotate(${-30+i*20},${x},${y})`} filter="url(#blur3)"/>
+      ))}
+
+      {/* Subtle texture overlay */}
+      <rect width="800" height="900" fill="white" opacity="0.08"/>
+    </svg>
   )
 }
 
 export default function Home() {
-  const [screen, setScreen] = useState('onboard')
+  const [screen, setScreen] = useState('onboard') // onboard | app
+  const [authMode, setAuthMode] = useState('login') // login | register
   const [items, setItems] = useState([])
   const [slug, setSlug] = useState('')
   const [userName, setUserName] = useState('')
   const [filter, setFilter] = useState('all')
-  const [newName, setNewName] = useState('')
-  const [existingSlug, setExistingSlug] = useState('')
+  const [name, setName] = useState('')
+  const [password, setPassword] = useState('')
   const [addText, setAddText] = useState('')
+  const [addDeadline, setAddDeadline] = useState('')
   const [toast, setToast] = useState('')
   const [toastVisible, setToastVisible] = useState(false)
-  const [onboardError, setOnboardError] = useState('')
+  const [error, setError] = useState('')
   const [appError, setAppError] = useState('')
   const [loading, setLoading] = useState(false)
   const [confetti, setConfetti] = useState([])
+  const [previewItems, setPreviewItems] = useState([])
+  const [previewName, setPreviewName] = useState('')
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('checklist_slug')
-    if (saved) loadList(saved).catch(() => localStorage.removeItem('checklist_slug'))
+    const savedName = localStorage.getItem('checklist_name')
+    if (saved) loadList(saved).catch(() => {
+      localStorage.removeItem('checklist_slug')
+      localStorage.removeItem('checklist_name')
+    })
   }, [])
+
+  // Load preview when name is typed
+  useEffect(() => {
+    if (!previewName.trim() || previewName.length < 2) { setPreviewItems([]); return }
+    const t = setTimeout(async () => {
+      setPreviewLoading(true)
+      try {
+        const slug = previewName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+        const data = await api('GET', `/api/users/${slug}`)
+        setPreviewItems(data.items?.slice(0,3) || [])
+      } catch { setPreviewItems([]) }
+      setPreviewLoading(false)
+    }, 600)
+    return () => clearTimeout(t)
+  }, [previewName])
 
   function showToast(msg) {
     setToast(msg); setToastVisible(true)
     setTimeout(() => setToastVisible(false), 2600)
   }
-  function showOErr(msg) { setOnboardError(msg); setTimeout(() => setOnboardError(''), 4000) }
+  function showErr(msg) { setError(msg); setTimeout(() => setError(''), 4000) }
   function showAErr(msg) { setAppError(msg); setTimeout(() => setAppError(''), 4000) }
 
   async function loadList(s) {
@@ -89,22 +178,17 @@ export default function Home() {
     const loaded = (data.items || []).map(i => ({ ...i, done: i.done === true || i.done === 'true' }))
     setSlug(data.slug); setUserName(data.name); setItems(loaded)
     localStorage.setItem('checklist_slug', data.slug)
+    localStorage.setItem('checklist_name', data.name)
     setScreen('app')
   }
 
-  async function handleCreate() {
-    if (!newName.trim()) { showOErr('Digite seu nome 🌸'); return }
+  async function handleAuth() {
+    if (!name.trim() || !password.trim()) { showErr('Preencha nome e senha 🌸'); return }
     setLoading(true)
-    try { const user = await api('POST', '/api/users', { name: newName.trim() }); await loadList(user.slug) }
-    catch(e) { showOErr(e.message) }
-    setLoading(false)
-  }
-
-  async function handleLoad() {
-    if (!existingSlug.trim()) { showOErr('Digite o código 🌸'); return }
-    setLoading(true)
-    try { await loadList(existingSlug.trim()) }
-    catch { showOErr('Lista não encontrada. Verifique o código!') }
+    try {
+      const user = await api('POST', '/api/auth', { action: authMode, name: name.trim(), password })
+      await loadList(user.slug)
+    } catch(e) { showErr(e.message) }
     setLoading(false)
   }
 
@@ -112,7 +196,9 @@ export default function Home() {
     if (!addText.trim()) return
     try {
       const item = await api('POST', `/api/users/${slug}`, { text: addText.trim() })
-      setItems(prev => [...prev, { ...item, done: false }]); setAddText('')
+      if (addDeadline) await api('PATCH', `/api/items/${item.id}`, { deadline: addDeadline })
+      setItems(prev => [...prev, { ...item, done: false, deadline: addDeadline || null }])
+      setAddText(''); setAddDeadline('')
     } catch(e) { showAErr(e.message) }
   }
 
@@ -123,8 +209,8 @@ export default function Home() {
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, done: isDone } : i))
       if (isDone) {
         showToast(MESSAGES[Math.floor(Math.random() * MESSAGES.length)])
-        const nowDone = items.map(i => i.id === item.id ? {...i, done: true} : i)
-        if (nowDone.length >= 20 && nowDone.every(i => i.done)) launchConfetti()
+        const next = items.map(i => i.id === item.id ? {...i,done:true} : i)
+        if (next.length >= 20 && next.every(i=>i.done)) launchConfetti()
       }
     } catch(e) { showAErr(e.message) }
   }
@@ -135,298 +221,187 @@ export default function Home() {
   }
 
   function launchConfetti() {
-    const pieces = Array.from({ length: 50 }, (_, i) => ({
-      id: i, left: Math.random() * 100,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      dur: 1.5 + Math.random() * 2, delay: Math.random() * 0.5
+    const pieces = Array.from({length:50},(_,i)=>({
+      id:i, left:Math.random()*100,
+      color:CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)],
+      dur:1.5+Math.random()*2, delay:Math.random()*.5
     }))
-    setConfetti(pieces); setTimeout(() => setConfetti([]), 4000)
+    setConfetti(pieces); setTimeout(()=>setConfetti([]),4000)
   }
 
-  const filtered = filter === 'done' ? items.filter(i=>i.done) : filter === 'pending' ? items.filter(i=>!i.done) : items
+  const filtered = filter==='done' ? items.filter(i=>i.done) : filter==='pending' ? items.filter(i=>!i.done) : items
   const done = items.filter(i=>i.done).length, total = items.length
-  const pct = total ? (done / Math.max(total,20)) * 100 : 0
-  const offset = 175.93 - 175.93 * pct / 100
+  const pct = total ? (done/Math.max(total,20))*100 : 0
+  const offset = 175.93 - 175.93*pct/100
   let progressMsg = 'Adicione seus sonhos ✨'
-  if (total>0&&done===0) progressMsg = `${total} conquista${total>1?'s':''} te esperando!`
-  else if (done>0&&done<total) progressMsg = `${total-done} pela frente!`
-  else if (total>0&&done===total) progressMsg = '🎉 Todas conquistadas! Lenda!'
+  if (total>0&&done===0) progressMsg=`${total} conquista${total>1?'s':''} te esperando!`
+  else if (done>0&&done<total) progressMsg=`${total-done} pela frente!`
+  else if (total>0&&done===total) progressMsg='🎉 Todas conquistadas! Lenda!'
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Playfair+Display:ital@0;1&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
-
-        body {
-          min-height:100vh;
-          font-family:'Quicksand',sans-serif;
-          color:#5a4a5e;
-          overflow-x:hidden;
-          position:relative;
-        }
-
-        /* Wallpaper background */
-        body::before {
-          content:'';
-          position:fixed;
-          inset:0;
-          z-index:-1;
-          background:
-            radial-gradient(ellipse at 20% 20%, rgba(255,210,220,0.55) 0%, transparent 60%),
-            radial-gradient(ellipse at 80% 10%, rgba(220,208,240,0.5) 0%, transparent 55%),
-            radial-gradient(ellipse at 10% 80%, rgba(240,220,250,0.45) 0%, transparent 50%),
-            radial-gradient(ellipse at 90% 85%, rgba(255,200,215,0.5) 0%, transparent 55%),
-            radial-gradient(ellipse at 50% 50%, rgba(255,230,240,0.3) 0%, transparent 70%),
-            linear-gradient(135deg, #fce8f3 0%, #f0e6fb 35%, #e8eefb 70%, #fce8f3 100%);
-        }
-
-        /* Subtle dot pattern */
-        body::after {
-          content:'';
-          position:fixed;
-          inset:0;
-          z-index:-1;
-          background-image: radial-gradient(circle, rgba(220,160,190,0.12) 1px, transparent 1px);
-          background-size: 28px 28px;
-        }
-
-        @keyframes bfly {
-          0%,100% { transform: translateY(0px) rotate(var(--r,0deg)) scale(1); }
-          25%      { transform: translateY(-12px) rotate(calc(var(--r,0deg) + 8deg)) scale(1.05); }
-          75%      { transform: translateY(8px) rotate(calc(var(--r,0deg) - 6deg)) scale(0.97); }
-        }
-
-        .wrap{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:32px 18px 60px}
-
-        .card{
-          background:rgba(255,255,255,0.62);
-          backdrop-filter:blur(22px);
-          -webkit-backdrop-filter:blur(22px);
-          border:1px solid rgba(255,255,255,0.88);
-          border-radius:28px;
-          padding:30px 24px;
-          box-shadow:0 8px 40px rgba(200,140,190,0.14), 0 2px 8px rgba(200,140,190,0.08);
-          margin-top:14px;
-          text-align:center;
-        }
-
-        .badge{
-          display:inline-block;
-          background:linear-gradient(135deg,#e8a0a0,#c8a0d8);
-          color:white;font-size:11px;font-weight:700;letter-spacing:2px;
-          text-transform:uppercase;padding:5px 16px;border-radius:20px;
-          margin-bottom:11px;box-shadow:0 2px 12px rgba(228,140,160,.35);
-        }
-        h1{font-family:'Playfair Display',serif;font-size:clamp(23px,6vw,33px);
-          font-weight:400;font-style:italic;line-height:1.2;margin-bottom:4px;color:#5a4050}
-        h1 strong{font-weight:700;font-style:normal;
-          background:linear-gradient(135deg,#d4708a,#c090d0);
-          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .sub{font-size:13px;color:#b8a0bc;margin-bottom:20px;line-height:1.6}
-
-        input[type=text]{
-          width:100%;padding:13px 16px;border-radius:14px;
-          border:1.5px solid rgba(210,180,220,0.5);
-          background:rgba(255,255,255,0.75);
-          font-family:'Quicksand',sans-serif;font-size:14px;font-weight:600;
-          color:#5a4a5e;outline:none;margin-bottom:9px;
-          transition:border-color .2s,box-shadow .2s;display:block;
-        }
-        input[type=text]:focus{border-color:#d4708a;box-shadow:0 0 0 3px rgba(212,112,138,.12)}
-        input[type=text]::placeholder{color:#c8b0cc;font-weight:500}
-
-        .bp{width:100%;padding:13px;border-radius:14px;
-          background:linear-gradient(135deg,#e08090,#c090d0);
-          border:none;color:white;font-family:'Quicksand',sans-serif;
-          font-size:14px;font-weight:700;cursor:pointer;
-          box-shadow:0 4px 18px rgba(200,100,150,.3);
-          transition:transform .15s,box-shadow .15s;margin-bottom:6px;display:block}
-        .bp:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(200,100,150,.4)}
+        body{min-height:100vh;font-family:'Quicksand',sans-serif;color:#5a3d50;overflow-x:hidden}
+        .wrap{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:30px 18px 60px}
+        .glass{background:rgba(255,255,255,0.58);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.85);border-radius:26px;box-shadow:0 8px 40px rgba(180,120,160,0.13),0 2px 8px rgba(180,120,160,0.08)}
+        .card{padding:28px 22px;margin-top:14px;text-align:center}
+        .badge{display:inline-block;background:linear-gradient(135deg,#d4708a,#a870c8);color:white;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 14px;border-radius:20px;margin-bottom:10px;box-shadow:0 2px 10px rgba(180,80,120,.3)}
+        h1{font-family:'Playfair Display',serif;font-size:clamp(22px,5.5vw,32px);font-weight:400;font-style:italic;line-height:1.2;margin-bottom:3px;color:#4a3045}
+        h1 strong{font-weight:700;font-style:normal;background:linear-gradient(135deg,#c4506a,#9060b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .sub{font-size:12px;color:#b090a8;margin-bottom:18px;line-height:1.6}
+        .tabs{display:flex;gap:0;margin-bottom:18px;background:rgba(180,140,170,.12);border-radius:14px;padding:3px}
+        .tab{flex:1;padding:9px;border:none;border-radius:11px;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;background:transparent;color:#b090a8}
+        .tab.on{background:white;color:#4a3045;box-shadow:0 2px 8px rgba(180,120,160,.18)}
+        input[type=text],input[type=password],input[type=date]{width:100%;padding:12px 15px;border-radius:13px;border:1.5px solid rgba(200,160,190,.4);background:rgba(255,255,255,.7);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:600;color:#4a3045;outline:none;margin-bottom:9px;transition:border-color .2s;display:block}
+        input:focus{border-color:#c4708a;box-shadow:0 0 0 3px rgba(196,112,138,.1)}
+        input::placeholder{color:#c0a0b8;font-weight:500}
+        .bp{width:100%;padding:13px;border-radius:13px;background:linear-gradient(135deg,#d4708a,#a870c8);border:none;color:white;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(180,80,130,.28);transition:transform .15s;display:block;margin-bottom:5px}
+        .bp:hover{transform:translateY(-1px)}
         .bp:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
-        .bs{width:100%;padding:11px;border-radius:14px;
-          background:rgba(255,255,255,.55);border:1.5px solid rgba(210,180,220,.55);
-          color:#b0909c;font-family:'Quicksand',sans-serif;font-size:13px;
-          font-weight:700;cursor:pointer;transition:all .2s;display:block}
-        .bs:hover{border-color:#d4708a;color:#5a4050;background:rgba(255,255,255,.8)}
-
-        .div{display:flex;align-items:center;gap:10px;margin:13px 0}
-        .div::before,.div::after{content:'';flex:1;height:1px;background:rgba(200,170,210,.4)}
-        .div span{font-size:11px;color:#c8b0cc;font-weight:600}
-
-        .err{background:rgba(255,180,180,.35);border:1px solid rgba(220,130,140,.4);
-          border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;
-          color:#b04050;margin-bottom:11px}
-
-        .pc{background:rgba(255,255,255,.6);backdrop-filter:blur(16px);
-          border:1px solid rgba(255,255,255,.88);border-radius:22px;
-          padding:17px 19px;margin-bottom:15px;
-          box-shadow:0 4px 20px rgba(200,140,190,.1);
-          display:flex;align-items:center;gap:15px}
-        .pcircle{position:relative;flex-shrink:0;width:66px;height:66px}
+        .bs{width:100%;padding:10px;border-radius:13px;background:rgba(255,255,255,.5);border:1.5px solid rgba(200,160,190,.4);color:#b090a8;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:block}
+        .bs:hover{border-color:#c4708a;color:#4a3045}
+        .err{background:rgba(240,160,160,.25);border:1px solid rgba(210,100,110,.3);border-radius:11px;padding:8px 13px;font-size:12px;font-weight:600;color:#a03040;margin-bottom:10px}
+        .preview-box{background:rgba(255,255,255,.45);border-radius:13px;padding:10px 13px;margin-top:10px;text-align:left}
+        .preview-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#c090b0;margin-bottom:7px}
+        .preview-item{font-size:12px;font-weight:600;color:#7a5068;padding:3px 0;display:flex;align-items:center;gap:6px}
+        .preview-item::before{content:'🌸';font-size:10px}
+        .pc{display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:14px}
+        .pcircle{position:relative;flex-shrink:0;width:64px;height:64px}
         .pcircle svg{transform:rotate(-90deg)}
-        .pnum{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-          font-size:12px;font-weight:700;color:#5a4050;text-align:center;line-height:1.1}
-        .pnum small{display:block;font-size:9px;color:#c8b0cc}
+        .pnum{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:#4a3045;text-align:center;line-height:1.1}
+        .pnum small{display:block;font-size:9px;color:#c0a0b8}
         .pinfo{flex:1}
-        .plbl{font-size:13px;font-weight:700;margin-bottom:6px;color:#5a4050}
-        .ptrack{height:7px;background:rgba(210,180,220,.25);border-radius:10px;overflow:hidden}
-        .pfill{height:100%;background:linear-gradient(90deg,#e08090,#c090d0);
-          border-radius:10px;transition:width .6s}
-        .pmsg{font-size:11px;color:#c0a0c0;margin-top:5px}
-
-        .ac{background:rgba(255,255,255,.62);backdrop-filter:blur(14px);
-          border:1px solid rgba(255,255,255,.88);border-radius:17px;
-          padding:10px 12px;margin-bottom:15px;
-          box-shadow:0 3px 14px rgba(200,140,190,.09);
-          display:flex;gap:9px;align-items:center}
-        .ai{flex:1;border:none;background:transparent;
-          font-family:'Quicksand',sans-serif;font-size:14px;font-weight:500;
-          color:#5a4a5e;outline:none;margin:0;padding:0}
-        .ai::placeholder{color:#c8b0cc}
-        .ab{width:35px;height:35px;border-radius:11px;
-          background:linear-gradient(135deg,#e08090,#c090d0);
-          border:none;cursor:pointer;color:white;font-size:22px;
-          display:flex;align-items:center;justify-content:center;
-          flex-shrink:0;box-shadow:0 3px 10px rgba(200,100,150,.3);
-          transition:transform .15s}
+        .plbl{font-size:12px;font-weight:700;margin-bottom:6px;color:#4a3045}
+        .ptrack{height:6px;background:rgba(200,160,190,.2);border-radius:10px;overflow:hidden}
+        .pfill{height:100%;background:linear-gradient(90deg,#d4708a,#a870c8);border-radius:10px;transition:width .6s}
+        .pmsg{font-size:11px;color:#c0a0b8;margin-top:4px}
+        .ac{display:flex;gap:8px;align-items:flex-start;padding:11px 12px;margin-bottom:14px}
+        .ac-fields{flex:1;display:flex;flex-direction:column;gap:5px}
+        .ac-fields input{margin-bottom:0;font-size:13px;padding:10px 13px}
+        .ab{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#d4708a,#a870c8);border:none;cursor:pointer;color:white;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 10px rgba(180,80,130,.28);transition:transform .15s;margin-top:0}
         .ab:hover{transform:scale(1.08)}
-
-        .fltrs{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap}
-        .fb{font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;
-          padding:5px 12px;border-radius:11px;border:1.5px solid transparent;cursor:pointer;transition:all .2s}
-        .fb.on{background:linear-gradient(135deg,#e08090,#c090d0);color:white;
-          box-shadow:0 2px 10px rgba(200,100,150,.3)}
-        .fb:not(.on){background:rgba(255,255,255,.55);color:#c0a0c0;
-          border-color:rgba(210,180,220,.5)}
-        .fb:not(.on):hover{border-color:#d4708a;color:#5a4050}
-
-        .slbl{font-size:11px;font-weight:700;letter-spacing:2px;
-          text-transform:uppercase;color:#c0a0bc;margin-bottom:10px;padding-left:3px}
-
-        .list{display:flex;flex-direction:column;gap:9px}
-        .item{background:rgba(255,255,255,.6);backdrop-filter:blur(14px);
-          border:1px solid rgba(255,255,255,.88);border-radius:16px;
-          padding:13px 13px;display:flex;align-items:center;gap:11px;
-          box-shadow:0 2px 12px rgba(200,140,190,.07);
-          transition:transform .2s;animation:fsi .35s cubic-bezier(.34,1.56,.64,1)}
-        @keyframes fsi{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+        .fltrs{display:flex;gap:6px;margin-bottom:11px;flex-wrap:wrap}
+        .fb{font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;padding:5px 11px;border-radius:10px;border:1.5px solid transparent;cursor:pointer;transition:all .2s}
+        .fb.on{background:linear-gradient(135deg,#d4708a,#a870c8);color:white;box-shadow:0 2px 8px rgba(180,80,130,.25)}
+        .fb:not(.on){background:rgba(255,255,255,.5);color:#c0a0b8;border-color:rgba(200,160,190,.4)}
+        .fb:not(.on):hover{border-color:#c4708a;color:#4a3045}
+        .slbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#c0a0b8;margin-bottom:9px;padding-left:2px}
+        .list{display:flex;flex-direction:column;gap:8px}
+        .item{display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:15px;transition:transform .2s;animation:fsi .3s cubic-bezier(.34,1.56,.64,1)}
+        @keyframes fsi{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
         .item:hover{transform:translateY(-1px)}
-        .item.done{background:rgba(255,235,242,.55);border-color:rgba(230,180,200,.45)}
-
-        .chkw{position:relative;flex-shrink:0;width:26px;height:26px;cursor:pointer}
+        .item.done{background:rgba(255,230,240,.4)!important;border-color:rgba(220,170,190,.35)!important}
+        .chkw{position:relative;flex-shrink:0;width:24px;height:24px;cursor:pointer}
         .chkw input[type=checkbox]{position:absolute;opacity:0;width:0;height:0;margin:0}
-        .chkv{width:26px;height:26px;border-radius:50%;border:2px solid #e8a0b0;
-          background:white;display:flex;align-items:center;justify-content:center;
-          transition:all .25s cubic-bezier(.34,1.56,.64,1);font-size:13px}
-        .chkw input:checked~.chkv{background:linear-gradient(135deg,#e08090,#c090d0);
-          border-color:transparent;transform:scale(1.1);
-          box-shadow:0 2px 9px rgba(200,100,150,.4)}
-
-        .itxt{flex:1;font-size:14px;font-weight:600;line-height:1.4;
-          transition:all .3s;color:#5a4a5e}
-        .done .itxt{text-decoration:line-through;text-decoration-color:#e08090;color:#c0a0b8}
-        .inum{font-size:10px;font-weight:700;color:#c0a0bc;
-          background:rgba(210,180,220,.3);padding:2px 6px;border-radius:7px;flex-shrink:0}
-        .del{width:26px;height:26px;border-radius:9px;border:none;
-          background:transparent;color:#c0a0bc;cursor:pointer;font-size:17px;
-          opacity:0;transition:opacity .2s;flex-shrink:0;
-          display:flex;align-items:center;justify-content:center;line-height:1}
+        .chkv{width:24px;height:24px;border-radius:50%;border:2px solid #d4a0b8;background:white;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.34,1.56,.64,1);font-size:11px}
+        .chkw input:checked~.chkv{background:linear-gradient(135deg,#d4708a,#a870c8);border-color:transparent;transform:scale(1.1);box-shadow:0 2px 8px rgba(180,80,130,.35)}
+        .item-main{flex:1;min-width:0}
+        .itxt{font-size:13px;font-weight:600;line-height:1.4;color:#4a3045;transition:all .3s}
+        .done .itxt{text-decoration:line-through;text-decoration-color:#d4708a;color:#b090a8}
+        .item-meta{display:flex;align-items:center;gap:5px;margin-top:2px}
+        .inum{font-size:9px;font-weight:700;color:#c0a0b8;background:rgba(200,160,190,.25);padding:1px 5px;border-radius:6px;flex-shrink:0}
+        .del{width:24px;height:24px;border-radius:8px;border:none;background:transparent;color:#c0a0b8;cursor:pointer;font-size:16px;opacity:0;transition:opacity .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
         .item:hover .del{opacity:1}
-        .del:hover{background:rgba(230,160,180,.25);color:#d4708a}
-
-        .empty{text-align:center;padding:34px 14px;color:#c0a0bc}
-        .empty .em{font-size:36px;margin-bottom:10px}
-        .empty p{font-size:13px;font-weight:500}
-
-        .hname{font-size:12px;color:#c0a0bc;font-weight:600}
-        .hslug{display:inline-block;margin-top:4px;font-size:11px;color:#c0a0bc;
-          background:rgba(210,180,220,.25);padding:2px 10px;border-radius:9px;
-          cursor:pointer;font-family:monospace}
-        .hslug:hover{background:rgba(210,180,220,.5)}
-
-        .tw{position:fixed;bottom:28px;left:50%;
-          transform:translateX(-50%) translateY(80px);
-          transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:100}
+        .del:hover{background:rgba(220,140,160,.2);color:#c4506a}
+        .empty{text-align:center;padding:30px 14px;color:#c0a0b8}
+        .empty .em{font-size:34px;margin-bottom:8px}
+        .empty p{font-size:12px;font-weight:500}
+        .hname{font-size:11px;color:#b090a8;font-weight:600}
+        .hslug{display:inline-block;margin-top:3px;font-size:10px;color:#b090a8;background:rgba(200,160,190,.2);padding:2px 9px;border-radius:8px;cursor:pointer;font-family:monospace}
+        .hslug:hover{background:rgba(200,160,190,.4)}
+        .tw{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:100}
         .tw.show{transform:translateX(-50%) translateY(0)}
-        .ti{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);
-          border:1px solid rgba(255,255,255,.95);border-radius:18px;
-          padding:11px 20px;font-size:13px;font-weight:600;color:#5a4050;
-          box-shadow:0 8px 28px rgba(200,140,190,.2);white-space:nowrap}
-
+        .ti{background:rgba(255,255,255,.88);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.95);border-radius:17px;padding:10px 18px;font-size:12px;font-weight:600;color:#4a3045;box-shadow:0 8px 26px rgba(180,120,160,.2);white-space:nowrap}
         .cw{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
-        .cp{position:absolute;width:8px;height:8px;border-radius:2px;
-          animation:cf linear forwards}
-        @keyframes cf{
-          0%{transform:translateY(-20px) rotate(0);opacity:1}
-          100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-
-        @media(max-width:420px){.wrap{padding:20px 12px 48px}}
+        .cp{position:absolute;width:7px;height:7px;border-radius:2px;animation:cf linear forwards}
+        @keyframes cf{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+        @media(max-width:420px){.wrap{padding:18px 12px 48px}}
       `}</style>
 
-      <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
 
-      {/* Butterflies wallpaper */}
-      {BUTTERFLY_PATHS.map((b, i) => <Butterfly key={i} {...b} />)}
+      <WatercolorBg/>
 
       <svg width="0" height="0" style={{position:'absolute'}}>
         <defs>
           <linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{stopColor:'#e08090'}}/>
-            <stop offset="100%" style={{stopColor:'#c090d0'}}/>
+            <stop offset="0%" style={{stopColor:'#d4708a'}}/>
+            <stop offset="100%" style={{stopColor:'#a870c8'}}/>
           </linearGradient>
         </defs>
       </svg>
 
       <div className="wrap">
 
+        {/* ── ONBOARD ── */}
         {screen === 'onboard' && (
           <>
-            <div style={{textAlign:'center',marginTop:14,marginBottom:20}}>
+            <div style={{textAlign:'center',marginTop:10,marginBottom:18}}>
               <div className="badge">✨ bem-vinda</div>
               <h1>Meus <strong>20</strong><br/>antes dos 20</h1>
             </div>
-            <div className="card">
-              <div style={{fontSize:42,marginBottom:12}}>🌸</div>
-              <div style={{fontFamily:"'Playfair Display',serif",fontStyle:'italic',fontSize:21,marginBottom:7,color:'#5a4050'}}>Crie sua lista</div>
-              <div className="sub">Registre 20 conquistas antes dos 20 anos.<br/>Seu progresso fica salvo para sempre!</div>
-              {onboardError && <div className="err">{onboardError}</div>}
-              <input type="text" value={newName} onChange={e=>setNewName(e.target.value)}
-                onKeyDown={e=>e.key==='Enter'&&handleCreate()}
-                placeholder="Seu nome (ex: Giovana)" maxLength={40}/>
-              <button className="bp" onClick={handleCreate} disabled={loading}>
-                {loading?'Criando...':'Criar minha lista ✨'}
-              </button>
-              <div className="div"><span>ou acesse sua lista existente</span></div>
-              <input type="text" value={existingSlug} onChange={e=>setExistingSlug(e.target.value)}
-                onKeyDown={e=>e.key==='Enter'&&handleLoad()}
-                placeholder="Digite seu código (ex: giovana)" maxLength={50}/>
-              <button className="bs" onClick={handleLoad} disabled={loading}>
-                {loading?'Buscando...':'Entrar na minha lista →'}
+
+            <div className="glass card">
+              <div style={{fontSize:38,marginBottom:10}}>🌸</div>
+
+              {/* Preview list on home */}
+              <div style={{marginBottom:16}}>
+                <input type="text" value={previewName} onChange={e=>setPreviewName(e.target.value)}
+                  placeholder="Espia a lista de alguém (opcional)..." style={{marginBottom:0}}/>
+                {previewLoading && <div style={{fontSize:11,color:'#c0a0b8',marginTop:5}}>Buscando... 🌸</div>}
+                {previewItems.length > 0 && (
+                  <div className="preview-box">
+                    <div className="preview-title">Prévia da lista</div>
+                    {previewItems.map(it=>(
+                      <div key={it.id} className="preview-item" style={{textDecoration:it.done?'line-through':'none',opacity:it.done?.6:1}}>{it.text}</div>
+                    ))}
+                    {previewItems.length === 3 && <div style={{fontSize:10,color:'#c0a0b8',marginTop:5}}>e mais conquistas...</div>}
+                  </div>
+                )}
+              </div>
+
+              <div className="sub">Crie sua lista ou entre na sua conta 🦋</div>
+
+              {error && <div className="err">{error}</div>}
+
+              <div className="tabs">
+                <button className={`tab${authMode==='login'?' on':''}`} onClick={()=>setAuthMode('login')}>Entrar</button>
+                <button className={`tab${authMode==='register'?' on':''}`} onClick={()=>setAuthMode('register')}>Criar conta</button>
+              </div>
+
+              <input type="text" value={name} onChange={e=>setName(e.target.value)}
+                onKeyDown={e=>e.key==='Enter'&&handleAuth()}
+                placeholder="Seu nome" maxLength={40}/>
+              <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
+                onKeyDown={e=>e.key==='Enter'&&handleAuth()}
+                placeholder="Senha" maxLength={50}/>
+              <button className="bp" onClick={handleAuth} disabled={loading}>
+                {loading ? '...' : authMode==='login' ? 'Entrar na minha lista →' : 'Criar minha lista ✨'}
               </button>
             </div>
           </>
         )}
 
+        {/* ── APP ── */}
         {screen === 'app' && (
           <>
-            <div style={{textAlign:'center',marginBottom:20}}>
+            <div style={{textAlign:'center',marginBottom:18}}>
               <div className="badge">✨ minha jornada</div>
               <h1>Meus <strong>20</strong> antes dos 20</h1>
               <div className="hname">de {userName} 🌸</div>
               <div className="hslug" onClick={()=>navigator.clipboard.writeText(slug).then(()=>showToast('Código copiado! 💖'))}>
-                código: {slug}
+                #{slug}
               </div>
             </div>
 
-            <div className="pc">
+            {/* Progress */}
+            <div className="glass pc">
               <div className="pcircle">
-                <svg width="66" height="66" viewBox="0 0 70 70">
-                  <circle style={{fill:'none',stroke:'rgba(210,180,220,.3)',strokeWidth:6}} cx="35" cy="35" r="28"/>
-                  <circle style={{fill:'none',stroke:'url(#pg)',strokeWidth:6,strokeLinecap:'round',
-                    strokeDasharray:175.93,strokeDashoffset:offset,transition:'stroke-dashoffset .6s'}}
-                    cx="35" cy="35" r="28"/>
+                <svg width="64" height="64" viewBox="0 0 70 70">
+                  <circle style={{fill:'none',stroke:'rgba(200,160,190,.2)',strokeWidth:6}} cx="35" cy="35" r="28"/>
+                  <circle style={{fill:'none',stroke:'url(#pg)',strokeWidth:6,strokeLinecap:'round',strokeDasharray:175.93,strokeDashoffset:offset,transition:'stroke-dashoffset .6s'}} cx="35" cy="35" r="28"/>
                 </svg>
                 <div className="pnum">{done}<small>de {total||20}</small></div>
               </div>
@@ -437,13 +412,19 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="ac">
-              <input className="ai" type="text" value={addText} onChange={e=>setAddText(e.target.value)}
-                onKeyDown={e=>e.key==='Enter'&&handleAdd()}
-                placeholder="Adicionar nova conquista..." maxLength={80}/>
-              <button className="ab" onClick={handleAdd}>+</button>
+            {/* Add item */}
+            <div className="glass ac">
+              <div className="ac-fields">
+                <input type="text" value={addText} onChange={e=>setAddText(e.target.value)}
+                  onKeyDown={e=>e.key==='Enter'&&handleAdd()}
+                  placeholder="Nova conquista..." maxLength={80}/>
+                <input type="date" value={addDeadline} onChange={e=>setAddDeadline(e.target.value)}
+                  style={{fontSize:12,color:addDeadline?'#4a3045':'#c0a0b8'}}/>
+              </div>
+              <button className="ab" onClick={handleAdd} style={{alignSelf:'flex-start',marginTop:2}}>+</button>
             </div>
 
+            {/* Filters */}
             <div className="fltrs">
               {[['all','Todas'],['pending','A fazer'],['done','Conquistadas 🎉']].map(([f,l])=>(
                 <button key={f} className={`fb${filter===f?' on':''}`} onClick={()=>setFilter(f)}>{l}</button>
@@ -451,7 +432,7 @@ export default function Home() {
             </div>
 
             <div className="slbl">
-              {filter==='all'?`Sua lista (${total}/20)`:filter==='done'?'Conquistadas 🎉':'A conquistar ✨'}
+              {filter==='all'?`sua lista (${total}/20)`:filter==='done'?'conquistadas':'a conquistar'}
             </div>
 
             {appError && <div className="err">{appError}</div>}
@@ -465,23 +446,28 @@ export default function Home() {
               ) : filtered.map(item=>{
                 const pos = items.indexOf(item)+1
                 return (
-                  <div key={item.id} className={`item${item.done?' done':''}`}>
+                  <div key={item.id} className={`item glass${item.done?' done':''}`}>
                     <label className="chkw">
                       <input type="checkbox" checked={!!item.done} onChange={()=>handleToggle(item)}/>
-                      <div className="chkv">{item.done?'🦋':''}</div>
+                      <div className="chkv">{item.done?'✓':''}</div>
                     </label>
-                    <span className="itxt">{item.text}</span>
-                    <span className="inum">{String(pos).padStart(2,'0')}</span>
+                    <div className="item-main">
+                      <div className="itxt">{item.text}</div>
+                      <div className="item-meta">
+                        <span className="inum">{String(pos).padStart(2,'0')}</span>
+                        <DeadlineBadge deadline={item.deadline}/>
+                      </div>
+                    </div>
                     <button className="del" onClick={()=>handleDelete(item.id)}>×</button>
                   </div>
                 )
               })}
             </div>
 
-            <div style={{textAlign:'center',marginTop:22}}>
-              <button className="bs" style={{width:'auto',padding:'7px 18px',fontSize:12}}
-                onClick={()=>{localStorage.removeItem('checklist_slug');setScreen('onboard');setItems([]);setSlug('');setNewName('');setExistingSlug('')}}>
-                ← Trocar de lista
+            <div style={{textAlign:'center',marginTop:20}}>
+              <button className="bs" style={{width:'auto',padding:'6px 16px',fontSize:11}}
+                onClick={()=>{localStorage.removeItem('checklist_slug');localStorage.removeItem('checklist_name');setScreen('onboard');setItems([]);setSlug('');setName('');setPassword('')}}>
+                ← Sair da conta
               </button>
             </div>
           </>
@@ -489,11 +475,9 @@ export default function Home() {
       </div>
 
       <div className={`tw${toastVisible?' show':''}`}><div className="ti">{toast}</div></div>
-
       <div className="cw">
         {confetti.map(p=>(
-          <div key={p.id} className="cp" style={{left:p.left+'vw',background:p.color,
-            animationDuration:p.dur+'s',animationDelay:p.delay+'s'}}/>
+          <div key={p.id} className="cp" style={{left:p.left+'vw',background:p.color,animationDuration:p.dur+'s',animationDelay:p.delay+'s'}}/>
         ))}
       </div>
     </>
